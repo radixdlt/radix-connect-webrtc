@@ -1,6 +1,7 @@
 import { SecretsClient } from './secrets-client'
 import { SignalingClient } from './signaling/signaling-client'
 import {
+  combineLatest,
   distinctUntilChanged,
   filter,
   finalize,
@@ -24,16 +25,14 @@ import { errAsync, ResultAsync } from 'neverthrow'
 import { errorIdentity } from '../utils/error-identity'
 import { sendMessageOverDataChannelAndWaitForConfirmation } from './webrtc/helpers/send-message-over-data-channel-and-wait-for-confirmation'
 import { ConnectorClientSubjects } from './subjects'
-import type { MessageErrorReasons, Secrets, TurnServer } from './_types'
+import type { ConnectionConfig, MessageErrorReasons, Secrets } from './_types'
 
 export type ConnectorClient = ReturnType<typeof ConnectorClient>
 
 export const ConnectorClient = (input: {
   target: MessageSources
   source: MessageSources
-  signalingServerBaseUrl: string
   isInitiator: boolean
-  turnServers: TurnServer[]
   logger?: Logger<unknown>
   createWebRtcSubjects?: () => WebRtcSubjectsType
   createSignalingSubjects?: () => SignalingSubjectsType
@@ -73,11 +72,22 @@ export const ConnectorClient = (input: {
 
   const subscriptions = new Subscription()
 
-  const connection$ = secretsClient.secrets$.pipe(
-    filter((secrets): secrets is Secrets => !!secrets),
-    switchMap((secrets) => {
+  const connection$ = combineLatest([
+    secretsClient.secrets$.pipe(
+      filter((secrets): secrets is Secrets => !!secrets),
+    ),
+    subjects.connectionConfig
+      .asObservable()
+      .pipe(
+        filter(
+          (connectionConfig): connectionConfig is ConnectionConfig =>
+            !!connectionConfig,
+        ),
+      ),
+  ]).pipe(
+    switchMap(([secrets, connectionConfig]) => {
       const signalingClient = SignalingClient({
-        baseUrl: input.signalingServerBaseUrl,
+        baseUrl: connectionConfig.signalingServerBaseUrl,
         target: input.target,
         source: input.source,
         logger,
@@ -104,7 +114,7 @@ export const ConnectorClient = (input: {
             {
               urls: 'stun:stun4.l.google.com:19302',
             },
-            ...input.turnServers,
+            ...(connectionConfig.turnServers || []),
           ],
         },
         dataChannelConfig: {
@@ -162,6 +172,8 @@ export const ConnectorClient = (input: {
     connectionPassword$: secretsClient.secrets$.pipe(
       map((secrets) => secrets?.encryptionKey),
     ),
+    setConnectionConfig: (config: ConnectionConfig) =>
+      subjects.connectionConfig.next(config),
     generateConnectionPassword: () => secretsClient.generateConnectionSecrets(),
     connect: () => shouldConnectSubject.next(true),
     disconnect: () => shouldConnectSubject.next(false),

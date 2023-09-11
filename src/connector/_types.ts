@@ -110,3 +110,8 @@ export type TurnServer = {
 export type StunServer = {
   urls: string
 }
+
+export type ConnectionConfig = {
+  signalingServerBaseUrl: string
+  turnServers?: TurnServer[]
+}
