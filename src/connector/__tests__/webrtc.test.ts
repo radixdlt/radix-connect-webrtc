@@ -46,30 +46,32 @@ describe('connector client', () => {
 
   const createExtensionConnector = () => {
     extensionConnector = ConnectorClient({
-      turnServers: [],
       source: 'extension',
       target: 'wallet',
-      signalingServerBaseUrl:
-        'wss://signaling-server-dev.rdx-works-main.extratools.works',
       logger: extensionLogger,
       isInitiator: false,
       subjects: extensionConnectorSubjects,
       createSignalingSubjects: () => extensionSignalingSubjects,
       createWebRtcSubjects: () => extensionWebRtcSubjects,
     })
+    extensionConnector.setConnectionConfig({
+      signalingServerBaseUrl:
+        'wss://signaling-server-dev.rdx-works-main.extratools.works',
+    })
   }
 
   const createWalletConnector = () => {
     walletConnector = ConnectorClient({
-      turnServers: [],
       source: 'wallet',
       target: 'extension',
-      signalingServerBaseUrl:
-        'wss://signaling-server-dev.rdx-works-main.extratools.works',
       // logger: walletLogger,
       subjects: walletConnectorSubjects,
       isInitiator: true,
       createWebRtcSubjects: () => walletWebRtcSubjects,
+    })
+    walletConnector.setConnectionConfig({
+      signalingServerBaseUrl:
+        'wss://signaling-server-dev.rdx-works-main.extratools.works',
     })
   }
 
