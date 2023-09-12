@@ -1,4 +1,4 @@
-name: Build
+name: Build, Test and Release
 on:
   push:
     branches: ['**']
@@ -94,6 +94,15 @@ jobs:
 
       - name: Running tests
         run: npm run test
+
+      - name: Release
+        if: startsWith(github.ref_name, 'release/') || github.ref_name == 'main' || github.ref_name == 'develop'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+        run: |
+          npx semantic-release | tee out
+          echo "RELEASE_VERSION=$(grep 'Created tag ' out | awk -F 'Created tag ' '{print $2}')" >> $GITHUB_ENV
 
   # snyk_monitor:
   #   runs-on: ubuntu-latest
