@@ -1,5 +1,4 @@
-name: Build typescript ROLA
-
+name: Build
 on:
   push:
     branches: ['**']
@@ -74,7 +73,7 @@ jobs:
   #         args: --all-projects --org=${{ env.SNYK_PROJECTS_ORG_ID }} --format=cyclonedx1.4+json --json-file-output sbom.json
   #         command: sbom
 
-  test_and_lint:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -82,7 +81,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.3.0'
+          node-version: '18.17.1'
 
       - name: Install dependencies
         run: npm ci
@@ -90,20 +89,11 @@ jobs:
       - name: Running lint
         run: npm run lint
 
-      # todo: failing in CI with code 139
-      # - name: Running tests
-      # run: npm run test
-
       - name: Build
         run: npm run build
 
-      - name: Prepare artifact
-        run: rm -rf node_modules e2e src sandbox
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: typescript-rola.${{ github.sha }}
-          path: .
+      - name: Running tests
+        run: npm run test
 
   # snyk_monitor:
   #   runs-on: ubuntu-latest
