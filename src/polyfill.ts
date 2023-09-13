@@ -10,7 +10,7 @@ export const polyfillWebRTC = () => {
     globalThis.RTCPeerConnection = RTCPeerConnection
     globalThis.RTCIceCandidate = RTCIceCandidate
     globalThis.RTCSessionDescription = RTCSessionDescription
-  } else if (!global.RTCPeerConnection) {
+  } else if (typeof global !== 'undefined' && !global.RTCPeerConnection) {
     global.RTCPeerConnection = RTCPeerConnection
     global.RTCIceCandidate = RTCIceCandidate
     global.RTCSessionDescription = RTCSessionDescription
