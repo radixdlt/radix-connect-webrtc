@@ -19,11 +19,12 @@
     "Dawid Sowa <dawid.sowa@rdx.works>"
   ],
   "bugs": "https://github.com/radixdlt/radix-connect-webrtc/issues",
-  "license": "Apache-2.0",
+  "license": "SEE LICENSE IN RADIX-SOFTWARE-EULA",
   "engines": {
     "node": ">=14.0.0"
   },
   "files": [
+    "RADIX-SOFTWARE-EULA",
     "dist"
   ],
   "main": "./dist/radix-connect-webrtc.mjs",
