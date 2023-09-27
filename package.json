@@ -90,7 +90,7 @@
     "lodash.chunk": "^4.2.0",
     "neverthrow": "^6.0.0",
     "rxjs": "^7.8.1",
-    "tslog": "^4.9.2",
+    "tslog": "4.8.0",
     "zod": "^3.22.2"
   },
   "repository": {
