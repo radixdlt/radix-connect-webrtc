@@ -24,13 +24,13 @@ export const getKey = (encryptionKey: Buffer) =>
 
 const cryptoDecrypt = (data: Buffer, encryptionKey: CryptoKey, iv: Buffer) =>
   ResultAsync.fromPromise(
-    crypto.subtle.decrypt({ name: 'AES-GCM', iv }, encryptionKey, data),
+    subtle.decrypt({ name: 'AES-GCM', iv }, encryptionKey, data),
     errorIdentity,
   ).map(Buffer.from)
 
 const cryptoEncrypt = (data: Buffer, encryptionKey: CryptoKey, iv: Buffer) =>
   ResultAsync.fromPromise(
-    crypto.subtle.encrypt(
+    subtle.encrypt(
       {
         name: 'AES-GCM',
         iv,

@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer'
 import type { Result } from 'neverthrow'
 import { err, ok } from 'neverthrow'
-import { getRandomValues } from 'isomorphic-webcrypto'
+import getRandomValues from 'get-random-values'
 
 export const secureRandom = (byteCount: number): Result<Buffer, Error> => {
   if (byteCount <= 0) {
