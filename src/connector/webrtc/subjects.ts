@@ -1,6 +1,6 @@
 import type { Answer, Offer } from '@radixdlt/radix-connect-schemas'
 import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs'
-import type { IceCandidateMessage } from '../_types'
+import type { IceCandidateMessage } from '../../_types'
 
 export type WebRtcSubjectsType = ReturnType<typeof WebRtcSubjects>
 

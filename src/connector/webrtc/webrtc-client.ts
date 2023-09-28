@@ -18,12 +18,13 @@ import {
 } from 'rxjs'
 import type {
   ChunkedMessageType,
+  Dependencies,
   Message,
   StunServer,
   TurnServer,
-} from '../_types'
-import type { SignalingClientType } from '../signaling/signaling-client'
+} from '../../_types'
 import type { MessageSources } from '@radixdlt/radix-connect-schemas'
+import type { SignalingClient } from '../signaling/signaling-client'
 
 export type WebRtcClient = ReturnType<typeof WebRtcClient>
 
@@ -43,17 +44,18 @@ export const WebRtcClient = (input: {
   onDataChannelMessageSubject: Subject<ChunkedMessageType>
   sendMessageOverDataChannelSubject: Subject<string>
   onMessage: Subject<Message>
-  signalingClient: SignalingClientType
+  signalingClient: SignalingClient
   source: MessageSources
   confirmationTimeout: number
   restart: () => void
+  dependencies: Dependencies
 }) => {
   const logger = input.logger
   const subjects = input.subjects
   const restart = input.restart
   const signalingClient = input.signalingClient
 
-  const peerConnection: RTCPeerConnection = new RTCPeerConnection(
+  const peerConnection = new input.dependencies.WebRTC.RTCPeerConnection(
     input.peerConnectionConfig,
   )
 

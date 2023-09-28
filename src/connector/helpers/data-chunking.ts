@@ -3,10 +3,11 @@ import { err, ok } from 'neverthrow'
 import { bufferToChunks } from '../../utils'
 import { Buffer } from 'buffer'
 import { blake2b } from '../../crypto/blake2b'
-import type { MessageChunk, MetaData } from '../_types'
+import type { MessageChunk, MetaData } from '../../_types'
+import { v4 } from 'uuid'
 
 export const messageToChunked = (message: Buffer, chunkSize: number) => {
-  const messageId = crypto.randomUUID()
+  const messageId = v4()
   return bufferToChunks(message, chunkSize)
     .map((buffers) =>
       buffers.map(

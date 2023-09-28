@@ -1,4 +1,4 @@
-import type { SignalingClientType } from '../signaling/signaling-client'
+import type { SignalingClient } from '../signaling/signaling-client'
 import type {
   Answer,
   MessageSources,
@@ -16,7 +16,7 @@ export const PeerConnectionClient = (input: {
   logger?: Logger<unknown>
   shouldCreateOffer: boolean
   source: MessageSources
-  signalingClient: SignalingClientType
+  signalingClient: SignalingClient
   restart: () => void
 }) => {
   const peerConnection = input.peerConnection

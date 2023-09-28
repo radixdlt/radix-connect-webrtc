@@ -1,9 +1,9 @@
 import { readBuffer } from './buffer-reader'
+import { v4 } from 'uuid'
 
 const getArr = (length: number) => new Array(length).fill(null)
 describe('buffer reader', () => {
-  const uuid = crypto.randomUUID()
-  const buffer = Buffer.from(uuid)
+  const buffer = Buffer.from(v4())
   const data = buffer.toJSON().data
   it('should correctly read buffer', () => {
     const reader = readBuffer(buffer)

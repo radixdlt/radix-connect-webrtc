@@ -4,7 +4,7 @@ import type {
   Message,
   MessageChunk,
   MetaData,
-} from '../../_types'
+} from '../../../_types'
 import type { Subject } from 'rxjs'
 import { exhaustMap, filter, first, mergeMap, tap } from 'rxjs'
 import { parseJSON } from '../../../utils'
