@@ -25,7 +25,9 @@ import { errAsync, ResultAsync } from 'neverthrow'
 import { errorIdentity } from '../utils/error-identity'
 import { sendMessageOverDataChannelAndWaitForConfirmation } from './webrtc/helpers/send-message-over-data-channel-and-wait-for-confirmation'
 import { ConnectorClientSubjects } from './subjects'
-import type { ConnectionConfig, MessageErrorReasons, Secrets } from './_types'
+import type { ConnectionConfig, MessageErrorReasons, Secrets } from '../_types'
+import type { WebRTC } from '../dependencies/webrtc'
+import type { WebSocket } from '../dependencies/websocket'
 
 export type ConnectorClient = ReturnType<typeof ConnectorClient>
 
@@ -37,6 +39,7 @@ export const ConnectorClient = (input: {
   createWebRtcSubjects?: () => WebRtcSubjectsType
   createSignalingSubjects?: () => SignalingSubjectsType
   subjects?: ConnectorClientSubjects
+  dependencies: { WebRTC: WebRTC; WebSocket: WebSocket }
 }) => {
   const logger = input.logger
   logger?.debug(`🔌✨ connector client initiated`)
@@ -94,10 +97,12 @@ export const ConnectorClient = (input: {
         subjects: createSignalingSubjects(),
         secrets,
         restart: () => triggerRestartSubject.next(),
+        dependencies: input.dependencies,
       })
 
       const webRtcClient = WebRtcClient({
         iceTransportPolicy: connectionConfig.iceTransportPolicy,
+        dependencies: input.dependencies,
         peerConnectionConfig: {
           iceServers: [
             {

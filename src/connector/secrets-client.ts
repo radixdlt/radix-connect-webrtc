@@ -2,7 +2,7 @@ import type { Logger } from 'tslog'
 import { BehaviorSubject } from 'rxjs'
 import { deriveSecretsFromPassword as deriveSecretsFromPasswordFn } from './helpers/derive-secrets-from-connection-password'
 import { generateConnectionPassword } from './helpers/generate-connection-password'
-import type { Secrets } from './_types'
+import type { Secrets } from '../_types'
 
 export const SecretsClient = (input: { logger?: Logger<unknown> }) => {
   const logger = input.logger

@@ -6,7 +6,7 @@ import { toBuffer } from '../../utils/to-buffer'
 import type { WebRtcSubjectsType } from './subjects'
 import { stringify } from '../../utils/stringify'
 import { handleIncomingChunkedMessages } from './helpers/handle-incoming-chunked-messages'
-import type { ChunkedMessageType, Message } from '../_types'
+import type { ChunkedMessageType, Message } from '../../_types'
 
 export const DataChannelClient = (input: {
   dataChannel: RTCDataChannel

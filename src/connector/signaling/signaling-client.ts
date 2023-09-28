@@ -25,20 +25,21 @@ import {
 } from 'rxjs'
 import { parseRawMessage } from '../helpers/parse-raw-message'
 import type { SignalingSubjectsType } from './subjects'
-import type { Secrets } from '../_types'
+import type { Dependencies, Secrets } from '../../_types'
 import {
   isRemoteClientConnectionUpdate,
   remoteClientConnected,
   remoteClientDisconnected,
   remoteClientState,
-} from '../_types'
+} from '../../_types'
 import { decryptMessagePayload } from '../helpers'
 import type { Ok, Result, ResultAsync } from 'neverthrow'
 import { err, ok } from 'neverthrow'
 import { createIV, encrypt } from '../../crypto/encryption'
 import { stringify } from '../../utils/stringify'
+import { v4 } from 'uuid'
 
-export type SignalingClientType = ReturnType<typeof SignalingClient>
+export type SignalingClient = ReturnType<typeof SignalingClient>
 
 export const SignalingClient = (input: {
   baseUrl: string
@@ -48,6 +49,7 @@ export const SignalingClient = (input: {
   source: MessageSources
   logger?: Logger<unknown>
   restart: () => void
+  dependencies: Dependencies
 }) => {
   const logger = input.logger
   const subjects = input.subjects
@@ -57,7 +59,7 @@ export const SignalingClient = (input: {
 
   subjects.statusSubject.next('connecting')
   logger?.debug(`🛰⚪️ signaling server: connecting`, { url })
-  const ws = new WebSocket(url)
+  const ws = new input.dependencies.WebSocket(url)
 
   const onConfirmation$ = input.subjects.onMessageSubject.pipe(
     filter(
@@ -70,7 +72,7 @@ export const SignalingClient = (input: {
       filter((incomingMessage) => incomingMessage.requestId === requestId),
     )
 
-  const onMessage = (event: MessageEvent<string>) => {
+  const onMessage = (event: any) => {
     parseRawMessage(event.data).map((message) => {
       if (message.info === 'remoteData')
         logger?.trace(
@@ -93,7 +95,7 @@ export const SignalingClient = (input: {
     subjects.statusSubject.next('disconnected')
   }
 
-  const onError = (event: Event) => {
+  const onError = (event: any) => {
     logger?.debug(`🛰❌ signaling server error`, event)
     subjects.onErrorSubject.next(event)
   }
@@ -116,7 +118,7 @@ export const SignalingClient = (input: {
         ),
       )
       .map((encrypted) => ({
-        requestId: crypto.randomUUID(),
+        requestId: v4(),
         connectionId: connectionId,
         targetClientId,
         encryptedPayload: encrypted.combined.toString('hex'),
@@ -224,7 +226,9 @@ export const SignalingClient = (input: {
     filter(
       (result): result is Ok<IceCandidate['payload'], never> => !result.isErr(),
     ),
-    map((result) => new RTCIceCandidate(result.value)),
+    map(
+      (result) => new input.dependencies.WebRTC.RTCIceCandidate(result.value),
+    ),
   )
 
   const onRemoteClientConnectionStateChange$ =
@@ -253,9 +257,9 @@ export const SignalingClient = (input: {
   )
 
   ws.onmessage = onMessage
+  ws.onerror = onError
   ws.onopen = onOpen
   ws.onclose = onClose
-  ws.onerror = onError
 
   return {
     remoteClientConnected$: waitForRemoteClient(remoteClientConnected),

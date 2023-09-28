@@ -17,7 +17,7 @@ import {
 import type { WebRtcSubjectsType } from './subjects'
 import { ResultAsync } from 'neverthrow'
 import { errorIdentity } from '../../utils/error-identity'
-import type { IceCandidateMessage } from '../_types'
+import type { IceCandidateMessage } from '../../_types'
 
 export const cacheRemoteIceCandidates = (subjects: WebRtcSubjectsType) =>
   subjects.onRemoteIceCandidateSubject.pipe(
