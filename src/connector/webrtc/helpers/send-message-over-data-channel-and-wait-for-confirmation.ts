@@ -3,8 +3,8 @@ import type {
   MessageConfirmation,
   MessageErrorReasons,
   MessageErrorTypes,
-} from '../../_types'
-import { messageErrorReasons } from '../../_types'
+} from '../../../_types'
+import { messageErrorReasons } from '../../../_types'
 import { errAsync, okAsync, ResultAsync } from 'neverthrow'
 import type { Subject } from 'rxjs'
 import { filter, firstValueFrom } from 'rxjs'

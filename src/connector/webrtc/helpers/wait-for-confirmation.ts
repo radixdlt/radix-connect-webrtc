@@ -1,4 +1,4 @@
-import type { ChunkedMessageType, MessageConfirmation } from '../../_types'
+import type { ChunkedMessageType, MessageConfirmation } from '../../../_types'
 import type { Subject } from 'rxjs'
 import { filter } from 'rxjs'
 
