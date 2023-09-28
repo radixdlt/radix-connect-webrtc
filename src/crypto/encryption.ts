@@ -3,12 +3,13 @@ import { errorIdentity } from '../utils/error-identity'
 import type { SealedBoxProps } from './sealbox'
 import { secureRandom } from './secure-random'
 import { Buffer } from 'buffer'
+import { subtle } from 'isomorphic-webcrypto'
 
 export const createIV = () => secureRandom(12)
 
 export const getKey = (encryptionKey: Buffer) =>
   ResultAsync.fromPromise(
-    crypto.subtle.importKey(
+    subtle.importKey(
       'raw',
       encryptionKey,
       {
