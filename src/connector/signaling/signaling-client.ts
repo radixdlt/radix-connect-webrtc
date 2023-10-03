@@ -143,10 +143,14 @@ export const SignalingClient = (input: {
         const sendMessage$ = of(stringify(encryptedMessage)).pipe(
           tap((result) =>
             result.map((data) => {
-              logger?.trace(
-                `🛰💬⬆️ sending: ${message.method} (${encryptedMessage.requestId})`,
-              )
-              return ws.send(data)
+              const incorrectStates: number[] = [ws.CLOSED, ws.CLOSING]
+              if (!incorrectStates.includes(ws.readyState)) {
+                logger?.trace(
+                  `🛰💬⬆️ sending: ${message.method} (${encryptedMessage.requestId})`,
+                )
+
+                return ws.send(data)
+              }
             }),
           ),
           filter(() => false),
