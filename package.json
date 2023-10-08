@@ -28,7 +28,8 @@
     "RADIX-SOFTWARE-EULA",
     "dist"
   ],
-  "main": "./dist/radix-connect-webrtc.mjs",
+  "main": "./dist/radix-connect-webrtc.umd.cjs",
+  "module": "./dist/radix-connect-webrtc.js",
   "exports": {
     ".": {
       "import": {
