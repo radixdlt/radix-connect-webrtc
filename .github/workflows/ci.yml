@@ -24,8 +24,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Running tests
-        run: npm run test
+      - name: Test
+        run: ./run-test.sh
 
       - name: Release
         if: startsWith(github.ref_name, 'release/') || github.ref_name == 'main' || github.ref_name == 'develop'

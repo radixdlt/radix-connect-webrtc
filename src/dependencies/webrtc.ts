@@ -1,18 +1,14 @@
-import {
-  RTCIceCandidate,
-  RTCSessionDescription,
-  RTCPeerConnection,
-  // @ts-ignore
-} from '@koush/wrtc'
+// @ts-nocheck
+import webRTC from '@koush/wrtc'
 
 export type WebRTC = {
-  RTCIceCandidate: typeof RTCIceCandidate
-  RTCSessionDescription: typeof RTCSessionDescription
-  RTCPeerConnection: typeof RTCPeerConnection
+  RTCIceCandidate: (typeof webRTC)['RTCIceCandidate']
+  RTCSessionDescription: (typeof webRTC)['RTCSessionDescription']
+  RTCPeerConnection: (typeof webRTC)['RTCPeerConnection']
 }
 
 export const NodeWebRTC = (): WebRTC => ({
-  RTCIceCandidate,
-  RTCSessionDescription,
-  RTCPeerConnection,
+  RTCIceCandidate: webRTC.RTCIceCandidate,
+  RTCSessionDescription: webRTC.RTCSessionDescription,
+  RTCPeerConnection: webRTC.RTCPeerConnection,
 })
