@@ -97,6 +97,7 @@ export const ConnectorClient = (input: {
       })
 
       const webRtcClient = WebRtcClient({
+        iceTransportPolicy: connectionConfig.iceTransportPolicy,
         peerConnectionConfig: {
           iceServers: [
             {

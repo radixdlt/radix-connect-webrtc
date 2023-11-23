@@ -114,4 +114,5 @@ export type StunServer = {
 export type ConnectionConfig = {
   signalingServerBaseUrl: string
   turnServers?: TurnServer[]
+  iceTransportPolicy?: RTCIceTransportPolicy
 }

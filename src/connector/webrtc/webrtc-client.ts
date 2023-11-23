@@ -28,6 +28,7 @@ import type { MessageSources } from '@radixdlt/radix-connect-schemas'
 export type WebRtcClient = ReturnType<typeof WebRtcClient>
 
 export const WebRtcClient = (input: {
+  iceTransportPolicy?: RTCIceTransportPolicy
   peerConnectionConfig: {
     iceServers: (StunServer | TurnServer)[]
   }
@@ -53,9 +54,10 @@ export const WebRtcClient = (input: {
   const restart = input.restart
   const signalingClient = input.signalingClient
 
-  const peerConnection: RTCPeerConnection = new RTCPeerConnection(
-    input.peerConnectionConfig,
-  )
+  const peerConnection: RTCPeerConnection = new RTCPeerConnection({
+    ...input.peerConnectionConfig,
+    iceTransportPolicy: input.iceTransportPolicy,
+  })
 
   const dataChannel = peerConnection.createDataChannel(
     'data',
