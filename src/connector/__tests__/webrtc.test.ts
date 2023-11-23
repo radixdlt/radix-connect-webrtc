@@ -9,8 +9,8 @@ import { filter, firstValueFrom, Subject } from 'rxjs'
 import { delayAsync } from '../../test-utils/delay-async'
 import { Logger } from 'tslog'
 import { generateConnectionPassword } from '../helpers'
-import { NodeWebRTC } from '../../dependencies/webrtc'
 import { NodeWebSocket } from '../../dependencies/websocket'
+import { NodeWebRTC } from '../../radix-connect-webrtc'
 
 describe('connector client', () => {
   let extensionLogger = new Logger({ name: 'extensionConnector', minLevel: 0 })
@@ -46,12 +46,12 @@ describe('connector client', () => {
       subjects.statusSubject.pipe(filter((status) => status === value)),
     )
 
-  const dependencies: Dependencies = {
-    WebRTC: NodeWebRTC(),
+  const createDependencies = async (): Promise<Dependencies> => ({
+    WebRTC: await NodeWebRTC(),
     WebSocket: NodeWebSocket(),
-  }
+  })
 
-  const createExtensionConnector = () => {
+  const createExtensionConnector = async () => {
     extensionConnector = ConnectorClient({
       source: 'extension',
       target: 'wallet',
@@ -60,7 +60,7 @@ describe('connector client', () => {
       subjects: extensionConnectorSubjects,
       createSignalingSubjects: () => extensionSignalingSubjects,
       createWebRtcSubjects: () => extensionWebRtcSubjects,
-      dependencies,
+      dependencies: await createDependencies(),
     })
     extensionConnector.setConnectionConfig({
       signalingServerBaseUrl:
@@ -68,7 +68,7 @@ describe('connector client', () => {
     })
   }
 
-  const createWalletConnector = () => {
+  const createWalletConnector = async () => {
     walletConnector = ConnectorClient({
       source: 'wallet',
       target: 'extension',
@@ -76,7 +76,7 @@ describe('connector client', () => {
       subjects: walletConnectorSubjects,
       isInitiator: true,
       createWebRtcSubjects: () => walletWebRtcSubjects,
-      dependencies,
+      dependencies: await createDependencies(),
     })
     walletConnector.setConnectionConfig({
       signalingServerBaseUrl:
@@ -106,8 +106,8 @@ describe('connector client', () => {
   })
 
   it('should open data channel between two peers', async () => {
-    createExtensionConnector()
-    createWalletConnector()
+    await createExtensionConnector()
+    await createWalletConnector()
     extensionConnector.setConnectionPassword(password)
     extensionConnector.connect()
 
@@ -120,7 +120,7 @@ describe('connector client', () => {
   })
 
   it('should reconnect to SS if connection password is changed', async () => {
-    createExtensionConnector()
+    await createExtensionConnector()
 
     extensionConnector.setConnectionPassword(password)
     extensionConnector.connect()
@@ -143,7 +143,7 @@ describe('connector client', () => {
   })
 
   it('should wait for connection password before connecting', async () => {
-    createExtensionConnector()
+    await createExtensionConnector()
     extensionConnector.connect()
 
     expect(
@@ -164,8 +164,8 @@ describe('connector client', () => {
   })
 
   it('should fail to send a message if data channel is closed', async () => {
-    createExtensionConnector()
-    createWalletConnector()
+    await createExtensionConnector()
+    await createWalletConnector()
 
     const result = await extensionConnector.sendMessage({ foo: 'bar' })
 
@@ -185,8 +185,8 @@ describe('connector client', () => {
   })
 
   it('should open data channel and send message', async () => {
-    createExtensionConnector()
-    createWalletConnector()
+    await createExtensionConnector()
+    await createWalletConnector()
 
     extensionConnector.setConnectionPassword(password)
     extensionConnector.connect()
