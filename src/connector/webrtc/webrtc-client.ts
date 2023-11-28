@@ -58,10 +58,11 @@ export const WebRtcClient = (input: {
   const restart = input.restart
   const signalingClient = input.signalingClient
 
-  const peerConnection: RTCPeerConnection = new RTCPeerConnection({
-    ...input.peerConnectionConfig,
-    iceTransportPolicy: input.iceTransportPolicy,
-  })
+  const peerConnection: RTCPeerConnection =
+    new input.dependencies.WebRTC.RTCPeerConnection({
+      ...input.peerConnectionConfig,
+      iceTransportPolicy: input.iceTransportPolicy,
+    })
 
   const dataChannel = peerConnection.createDataChannel(
     'data',
