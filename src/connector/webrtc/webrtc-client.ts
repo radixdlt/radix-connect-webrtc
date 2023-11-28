@@ -108,7 +108,7 @@ export const WebRtcClient = (input: {
               filter((status) => status === 'open'),
               map(() => false),
             ),
-            timer(5_000).pipe(map(() => true)),
+            timer(input.negotiationTimeout).pipe(map(() => true)),
           ).pipe(
             first(),
             tap((shouldRestart) => {
