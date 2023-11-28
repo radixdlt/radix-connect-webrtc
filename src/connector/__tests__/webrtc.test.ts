@@ -1,3 +1,5 @@
+// @ts-nocheck
+import webRTC from '@koush/wrtc'
 import { ConnectorClient } from '../connector-client'
 import type { SignalingSubjectsType } from '../signaling/subjects'
 import { SignalingSubjects } from '../signaling/subjects'
@@ -9,8 +11,13 @@ import { filter, firstValueFrom, Subject } from 'rxjs'
 import { delayAsync } from '../../test-utils/delay-async'
 import { Logger } from 'tslog'
 import { generateConnectionPassword } from '../helpers'
-import { NodeWebRTC } from '../../dependencies/webrtc'
 import { NodeWebSocket } from '../../dependencies/websocket'
+
+const NodeWebRTC = (): WebRTC => ({
+  RTCIceCandidate: webRTC.RTCIceCandidate,
+  RTCSessionDescription: webRTC.RTCSessionDescription,
+  RTCPeerConnection: webRTC.RTCPeerConnection,
+})
 
 describe('connector client', () => {
   let extensionLogger = new Logger({ name: 'extensionConnector', minLevel: 0 })

@@ -1,6 +1,3 @@
-// @ts-nocheck
-import webRTC from '@koush/wrtc'
-
 type AConstructorTypeOf<A, T> = new (args: A) => T
 
 export type WebRTC = {
@@ -11,12 +8,6 @@ export type WebRTC = {
   >
   RTCPeerConnection: AConstructorTypeOf<RTCConfiguration, RTCPeerConnection>
 }
-
-export const NodeWebRTC = (): WebRTC => ({
-  RTCIceCandidate: webRTC.RTCIceCandidate,
-  RTCSessionDescription: webRTC.RTCSessionDescription,
-  RTCPeerConnection: webRTC.RTCPeerConnection,
-})
 
 export const BrowserWebRTC = (): WebRTC => ({
   RTCIceCandidate: RTCIceCandidate,

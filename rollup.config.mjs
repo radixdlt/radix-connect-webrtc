@@ -18,12 +18,10 @@ export default [
       },
     ],
     plugins: [typescript()],
-    external: ['@koush/wrtc'],
   },
   {
     input: 'dist/types/radix-connect-webrtc.d.ts',
     output: [{ file: 'dist/radix-connect-webrtc.d.ts', format: 'es' }],
     plugins: [dts()],
-    external: ['@koush/wrtc'],
   },
 ]
