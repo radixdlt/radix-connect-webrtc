@@ -9,6 +9,7 @@ import {
   concatMap,
   filter,
   first,
+  map,
   merge,
   mergeMap,
   Subscription,
@@ -49,6 +50,7 @@ export const WebRtcClient = (input: {
   confirmationTimeout: number
   restart: () => void
   dependencies: Dependencies
+  negotiationTimeout: number
 }) => {
   const logger = input.logger
   const subjects = input.subjects
@@ -96,6 +98,27 @@ export const WebRtcClient = (input: {
   const onLocalAnswer$ = subjects.answerSubject
 
   const subscriptions = new Subscription()
+
+  subscriptions.add(
+    subjects.offerSubject
+      .pipe(
+        switchMap(() =>
+          merge(
+            subjects.dataChannelStatusSubject.pipe(
+              filter((status) => status === 'open'),
+              map(() => false),
+            ),
+            timer(5_000).pipe(map(() => true)),
+          ).pipe(
+            first(),
+            tap((shouldRestart) => {
+              if (shouldRestart) input.restart()
+            }),
+          ),
+        ),
+      )
+      .subscribe(),
+  )
 
   subscriptions.add(
     signalingClient.remoteClientConnected$
