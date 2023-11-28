@@ -40,6 +40,7 @@ export const ConnectorClient = (input: {
   createSignalingSubjects?: () => SignalingSubjectsType
   subjects?: ConnectorClientSubjects
   dependencies?: Partial<{ WebRTC: WebRTC; WebSocket: WebSocket }>
+  negotiationTimeout?: number
 }) => {
   const logger = input.logger
   logger?.debug(`🔌✨ connector client initiated`)
@@ -146,6 +147,7 @@ export const ConnectorClient = (input: {
         signalingClient,
         source: input.source,
         restart: () => triggerRestartSubject.next(),
+        negotiationTimeout: input.negotiationTimeout ?? 5_000,
       })
 
       const destroy = () => {
