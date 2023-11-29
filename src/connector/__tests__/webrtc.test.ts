@@ -1,14 +1,23 @@
+// @ts-nocheck
+import webRTC from '@koush/wrtc'
 import { ConnectorClient } from '../connector-client'
 import type { SignalingSubjectsType } from '../signaling/subjects'
 import { SignalingSubjects } from '../signaling/subjects'
 import { ConnectorClientSubjects } from '../subjects'
 import type { WebRtcSubjectsType } from '../webrtc/subjects'
 import { WebRtcSubjects } from '../webrtc/subjects'
-import type { Status } from '../_types'
+import type { Dependencies, Status } from '../../_types'
 import { filter, firstValueFrom, Subject } from 'rxjs'
 import { delayAsync } from '../../test-utils/delay-async'
 import { Logger } from 'tslog'
 import { generateConnectionPassword } from '../helpers'
+import { NodeWebSocket } from '../../dependencies/websocket'
+
+const NodeWebRTC = (): WebRTC => ({
+  RTCIceCandidate: webRTC.RTCIceCandidate,
+  RTCSessionDescription: webRTC.RTCSessionDescription,
+  RTCPeerConnection: webRTC.RTCPeerConnection,
+})
 
 describe('connector client', () => {
   let extensionLogger = new Logger({ name: 'extensionConnector', minLevel: 0 })
@@ -44,6 +53,11 @@ describe('connector client', () => {
       subjects.statusSubject.pipe(filter((status) => status === value)),
     )
 
+  const dependencies: Dependencies = {
+    WebRTC: NodeWebRTC(),
+    WebSocket: NodeWebSocket(),
+  }
+
   const createExtensionConnector = () => {
     extensionConnector = ConnectorClient({
       source: 'extension',
@@ -53,6 +67,7 @@ describe('connector client', () => {
       subjects: extensionConnectorSubjects,
       createSignalingSubjects: () => extensionSignalingSubjects,
       createWebRtcSubjects: () => extensionWebRtcSubjects,
+      dependencies,
     })
     extensionConnector.setConnectionConfig({
       signalingServerBaseUrl:
@@ -68,6 +83,7 @@ describe('connector client', () => {
       subjects: walletConnectorSubjects,
       isInitiator: true,
       createWebRtcSubjects: () => walletWebRtcSubjects,
+      dependencies,
     })
     walletConnector.setConnectionConfig({
       signalingServerBaseUrl:

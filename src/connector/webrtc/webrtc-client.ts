@@ -9,6 +9,7 @@ import {
   concatMap,
   filter,
   first,
+  map,
   merge,
   mergeMap,
   Subscription,
@@ -18,12 +19,13 @@ import {
 } from 'rxjs'
 import type {
   ChunkedMessageType,
+  Dependencies,
   Message,
   StunServer,
   TurnServer,
-} from '../_types'
-import type { SignalingClientType } from '../signaling/signaling-client'
+} from '../../_types'
 import type { MessageSources } from '@radixdlt/radix-connect-schemas'
+import type { SignalingClient } from '../signaling/signaling-client'
 
 export type WebRtcClient = ReturnType<typeof WebRtcClient>
 
@@ -44,20 +46,23 @@ export const WebRtcClient = (input: {
   onDataChannelMessageSubject: Subject<ChunkedMessageType>
   sendMessageOverDataChannelSubject: Subject<string>
   onMessage: Subject<Message>
-  signalingClient: SignalingClientType
+  signalingClient: SignalingClient
   source: MessageSources
   confirmationTimeout: number
   restart: () => void
+  dependencies: Dependencies
+  negotiationTimeout: number
 }) => {
   const logger = input.logger
   const subjects = input.subjects
   const restart = input.restart
   const signalingClient = input.signalingClient
 
-  const peerConnection: RTCPeerConnection = new RTCPeerConnection({
-    ...input.peerConnectionConfig,
-    iceTransportPolicy: input.iceTransportPolicy,
-  })
+  const peerConnection: RTCPeerConnection =
+    new input.dependencies.WebRTC.RTCPeerConnection({
+      ...input.peerConnectionConfig,
+      iceTransportPolicy: input.iceTransportPolicy,
+    })
 
   const dataChannel = peerConnection.createDataChannel(
     'data',
@@ -96,6 +101,27 @@ export const WebRtcClient = (input: {
   const onLocalAnswer$ = subjects.answerSubject
 
   const subscriptions = new Subscription()
+
+  subscriptions.add(
+    subjects.offerSubject
+      .pipe(
+        switchMap(() =>
+          merge(
+            subjects.dataChannelStatusSubject.pipe(
+              filter((status) => status === 'open'),
+              map(() => false),
+            ),
+            timer(input.negotiationTimeout).pipe(map(() => true)),
+          ).pipe(
+            first(),
+            tap((shouldRestart) => {
+              if (shouldRestart) input.restart()
+            }),
+          ),
+        ),
+      )
+      .subscribe(),
+  )
 
   subscriptions.add(
     signalingClient.remoteClientConnected$

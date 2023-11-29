@@ -5,74 +5,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  # snyk_scan_deps_licences:
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     id-token: write
-  #     pull-requests: read
-  #     contents: read
-  #     deployments: write
-  #   steps:
-  #     - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
-  #     - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
-  #       with:
-  #         role_name: ${{ secrets.AWS_ROLE_NAME_SNYK_SECRET }}
-  #         app_name: 'typescript-rola'
-  #         step_name: 'snyk-scan-deps-licenses'
-  #         secret_prefix: 'SNYK'
-  #         secret_name: ${{ secrets.AWS_SECRET_NAME_SNYK }}
-  #         parse_json: true
-  #     - name: Run Snyk to check for deps vulnerabilities
-  #       uses: snyk/actions/node@b98d498629f1c368650224d6d212bf7dfa89e4bf # v0.4.0
-  #       with:
-  #         args: --all-projects --org=${{ env.SNYK_PROJECTS_ORG_ID }} --severity-threshold=critical
-
-  # snyk_scan_code:
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     id-token: write
-  #     pull-requests: read
-  #     contents: read
-  #     deployments: write
-  #   steps:
-  #     - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
-  #     - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
-  #       with:
-  #         role_name: ${{ secrets.AWS_ROLE_NAME_SNYK_SECRET }}
-  #         app_name: 'typescript-rola'
-  #         step_name: 'snyk-scan-code'
-  #         secret_prefix: 'SNYK'
-  #         secret_name: ${{ secrets.AWS_SECRET_NAME_SNYK }}
-  #         parse_json: true
-  #     - name: Run Snyk to check for code vulnerabilities
-  #       uses: snyk/actions/node@b98d498629f1c368650224d6d212bf7dfa89e4bf # v0.4.0
-  #       with:
-  #         args: --all-projects --org=${{ env.SNYK_PROJECTS_ORG_ID }} --severity-threshold=high
-  #         command: code test
-
-  # snyk_sbom:
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     id-token: write
-  #     pull-requests: read
-  #     contents: read
-  #     deployments: write
-  #   steps:
-  #     - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
-  #     - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
-  #       with:
-  #         role_name: ${{ secrets.AWS_ROLE_NAME_SNYK_SECRET }}
-  #         app_name: 'typescript-rola'
-  #         step_name: 'snyk-sbom'
-  #         secret_prefix: 'SNYK'
-  #         secret_name: ${{ secrets.AWS_SECRET_NAME_SNYK }}
-  #         parse_json: true
-  #     - name: Generate SBOM # check SBOM can be generated but nothing is done with it
-  #       uses: snyk/actions/node@b98d498629f1c368650224d6d212bf7dfa89e4bf # v0.4.0
-  #       with:
-  #         args: --all-projects --org=${{ env.SNYK_PROJECTS_ORG_ID }} --format=cyclonedx1.4+json --json-file-output sbom.json
-  #         command: sbom
-
   build:
     runs-on: ubuntu-latest
 
@@ -81,7 +13,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18.17.1'
+          node-version: '18.17.0'
 
       - name: Install dependencies
         run: npm ci
@@ -92,8 +24,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Running tests
-        run: npm run test
+      - name: Test
+        run: ./run-test.sh
 
       - name: Release
         if: startsWith(github.ref_name, 'release/') || github.ref_name == 'main' || github.ref_name == 'develop'
@@ -103,29 +35,3 @@ jobs:
         run: |
           npx semantic-release | tee out
           echo "RELEASE_VERSION=$(grep 'Created tag ' out | awk -F 'Created tag ' '{print $2}')" >> $GITHUB_ENV
-
-  # snyk_monitor:
-  #   runs-on: ubuntu-latest
-  #   if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
-  #   needs:
-  #     - test_and_lint
-  #   permissions:
-  #     id-token: write
-  #     pull-requests: read
-  #     contents: read
-  #     deployments: write
-  #   steps:
-  #     - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
-  #     - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
-  #       with:
-  #         role_name: ${{ secrets.AWS_ROLE_NAME_SNYK_SECRET }}
-  #         app_name: 'connector-extension'
-  #         step_name: 'snyk-monitor'
-  #         secret_prefix: 'SNYK'
-  #         secret_name: ${{ secrets.AWS_SECRET_NAME_SNYK }}
-  #         parse_json: true
-  #     - name: Enable Snyk online monitoring to check for vulnerabilities
-  #       uses: snyk/actions/node@b98d498629f1c368650224d6d212bf7dfa89e4bf # v0.4.0
-  #       with:
-  #         args: --all-projects --org=${{ env.SNYK_PROJECTS_ORG_ID }} --target-reference=${{ github.ref_name }}
-  #         command: monitor

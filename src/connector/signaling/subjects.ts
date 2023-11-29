@@ -1,4 +1,4 @@
-import type { Status } from '../_types'
+import type { Status } from '../../_types'
 import type { SignalingServerResponse } from '@radixdlt/radix-connect-schemas'
 import { BehaviorSubject, Subject } from 'rxjs'
 

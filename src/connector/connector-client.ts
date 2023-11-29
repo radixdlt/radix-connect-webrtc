@@ -25,7 +25,9 @@ import { errAsync, ResultAsync } from 'neverthrow'
 import { errorIdentity } from '../utils/error-identity'
 import { sendMessageOverDataChannelAndWaitForConfirmation } from './webrtc/helpers/send-message-over-data-channel-and-wait-for-confirmation'
 import { ConnectorClientSubjects } from './subjects'
-import type { ConnectionConfig, MessageErrorReasons, Secrets } from './_types'
+import type { ConnectionConfig, MessageErrorReasons, Secrets } from '../_types'
+import { BrowserWebRTC, type WebRTC } from '../dependencies/webrtc'
+import { NodeWebSocket, type WebSocket } from '../dependencies/websocket'
 
 export type ConnectorClient = ReturnType<typeof ConnectorClient>
 
@@ -37,6 +39,8 @@ export const ConnectorClient = (input: {
   createWebRtcSubjects?: () => WebRtcSubjectsType
   createSignalingSubjects?: () => SignalingSubjectsType
   subjects?: ConnectorClientSubjects
+  dependencies?: Partial<{ WebRTC: WebRTC; WebSocket: WebSocket }>
+  negotiationTimeout?: number
 }) => {
   const logger = input.logger
   logger?.debug(`🔌✨ connector client initiated`)
@@ -49,6 +53,13 @@ export const ConnectorClient = (input: {
   const onMessage = subjects.onMessage
   const sendMessageOverDataChannelSubject =
     subjects.sendMessageOverDataChannelSubject
+
+  const webRTCDependency = input.dependencies?.WebRTC ?? BrowserWebRTC()
+  const websocketDependency = input.dependencies?.WebSocket ?? NodeWebSocket()
+  const resolvedDependencies = {
+    WebRTC: webRTCDependency,
+    WebSocket: websocketDependency,
+  }
 
   const createWebRtcSubjects =
     input.createWebRtcSubjects || (() => WebRtcSubjects())
@@ -94,10 +105,12 @@ export const ConnectorClient = (input: {
         subjects: createSignalingSubjects(),
         secrets,
         restart: () => triggerRestartSubject.next(),
+        dependencies: resolvedDependencies,
       })
 
       const webRtcClient = WebRtcClient({
         iceTransportPolicy: connectionConfig.iceTransportPolicy,
+        dependencies: resolvedDependencies,
         peerConnectionConfig: {
           iceServers: [
             {
@@ -134,6 +147,7 @@ export const ConnectorClient = (input: {
         signalingClient,
         source: input.source,
         restart: () => triggerRestartSubject.next(),
+        negotiationTimeout: input.negotiationTimeout ?? 5_000,
       })
 
       const destroy = () => {

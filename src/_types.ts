@@ -6,8 +6,8 @@ import type {
   RemoteClientJustConnected,
   SignalingServerResponse,
 } from '@radixdlt/radix-connect-schemas'
-import type { SignalingClientType } from './signaling/signaling-client'
-import type { WebRtcClient } from './webrtc/webrtc-client'
+import type { SignalingClient } from './connector/signaling/signaling-client'
+import type { WebRtcClient } from './connector/webrtc/webrtc-client'
 
 export const remoteClientState = {
   remoteClientIsAlreadyConnected: 'remoteClientIsAlreadyConnected',
@@ -33,9 +33,17 @@ export const isRemoteClientConnectionUpdate = (
   remoteClientConnected.has(message.info) ||
   remoteClientDisconnected.has(message.info)
 
+import type { WebSocket } from './dependencies/websocket'
+import type { WebRTC } from './dependencies/webrtc'
+
 export type Dependencies = {
+  WebSocket: WebSocket
+  WebRTC: WebRTC
+}
+
+export type DependencyInjection = {
   secrets: Secrets
-  signalingClient: SignalingClientType
+  signalingClient: SignalingClient
   webRtcClient: WebRtcClient
   source: MessageSources
 }
