@@ -193,6 +193,7 @@ export const ConnectorClient = (input: {
     connect: () => shouldConnectSubject.next(true),
     disconnect: () => shouldConnectSubject.next(false),
     shouldConnect$: shouldConnectSubject.asObservable(),
+    restart: () => triggerRestartSubject.next(),
     sendMessage: (
       message: Record<string, any>,
       options?: Partial<{
