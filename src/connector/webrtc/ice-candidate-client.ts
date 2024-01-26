@@ -77,19 +77,6 @@ export const IceCandidateClient = (input: {
     ),
   )
 
-  const haveLocalOffer$ = subjects.onSignalingStateChangeSubject.pipe(
-    filter((value) => value === 'have-local-offer'),
-  )
-
-  const haveRemoteOffer$ = subjects.onSignalingStateChangeSubject.pipe(
-    filter((value) => value === 'have-remote-offer'),
-  )
-  const waitForRemoteDescription$ = merge(
-    haveLocalOffer$,
-    haveRemoteOffer$,
-    subjects.onRemoteAnswerSubject,
-  )
-
   const onRemoteIceCandidate$ = merge(
     subjects.remoteIceCandidatesSubject.pipe(
       first(),
@@ -110,8 +97,9 @@ export const IceCandidateClient = (input: {
   )
 
   subscriptions.add(
-    waitForRemoteDescription$
+    subjects.onRemoteDescriptionSuccessSubject
       .pipe(
+        filter((value) => value),
         mergeMap(() => onRemoteIceCandidate$),
         concatMap(addIceCandidate),
       )
