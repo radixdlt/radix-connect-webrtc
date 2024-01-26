@@ -20,4 +20,5 @@ export const WebRtcSubjects = () => ({
   onSignalingStateChangeSubject: new Subject<RTCSignalingState>(),
   dataChannelStatusSubject: new BehaviorSubject<'open' | 'closed'>('closed'),
   iceConnectionStateSubject: new Subject<RTCIceConnectionState>(),
+  onRemoteDescriptionSuccessSubject: new BehaviorSubject<boolean>(false),
 })
