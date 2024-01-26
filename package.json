@@ -61,6 +61,7 @@
     "@commitlint/cli": "^17.7.1",
     "@commitlint/config-conventional": "^17.7.0",
     "@koush/wrtc": "^0.5.3",
+    "@radixdlt/semantic-release-config": "^1.1.0",
     "@rollup/plugin-typescript": "^11.1.5",
     "@types/blake2b": "^2.1.0",
     "@types/elliptic": "^6.4.14",
@@ -96,6 +97,11 @@
     "rxjs": "^7.8.1",
     "tslog": "4.8.0",
     "zod": "^3.22.4"
+  },
+  "release": {
+    "extends": [
+      "@radixdlt/semantic-release-config"
+    ]
   },
   "repository": {
     "type": "git",
