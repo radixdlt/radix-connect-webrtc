@@ -81,6 +81,7 @@ export const SignalingClient = (input: {
       else if (message.info !== 'confirmation')
         logger?.trace(`🛰💬⬇️ received:`, message)
 
+      logger?.trace(message)
       subjects.onMessageSubject.next(message)
     })
   }
