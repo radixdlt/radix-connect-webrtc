@@ -81,7 +81,6 @@ export const SignalingClient = (input: {
       else if (message.info !== 'confirmation')
         logger?.trace(`🛰💬⬇️ received:`, message)
 
-      logger?.trace(message)
       subjects.onMessageSubject.next(message)
     })
   }
@@ -182,7 +181,15 @@ export const SignalingClient = (input: {
       decryptMessagePayload<Offer['payload']>(
         message.data,
         input.secrets.encryptionKey,
-      ),
+      )
+        .map((result) => {
+          logger?.debug(result)
+          return result
+        })
+        .mapErr((err) => {
+          logger?.error(err)
+          return err
+        }),
     ),
     filter((result): result is Ok<Offer['payload'], never> => !result.isErr()),
     map(
@@ -202,7 +209,15 @@ export const SignalingClient = (input: {
       decryptMessagePayload<Answer['payload']>(
         message.data,
         input.secrets.encryptionKey,
-      ),
+      )
+        .map((result) => {
+          logger?.debug(result)
+          return result
+        })
+        .mapErr((err) => {
+          logger?.error(err)
+          return err
+        }),
     ),
     filter((result): result is Ok<Answer['payload'], never> => !result.isErr()),
     map(
@@ -222,7 +237,15 @@ export const SignalingClient = (input: {
       decryptMessagePayload<IceCandidate['payload']>(
         message.data,
         input.secrets.encryptionKey,
-      ),
+      )
+        .map((result) => {
+          logger?.debug(result)
+          return result
+        })
+        .mapErr((err) => {
+          logger?.error(err)
+          return err
+        }),
     ),
     filter(
       (result): result is Ok<IceCandidate['payload'], never> => !result.isErr(),
