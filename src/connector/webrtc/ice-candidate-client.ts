@@ -46,7 +46,20 @@ export const IceCandidateClient = (input: {
     )
     subjects.iceConnectionStateSubject.next(peerConnection.iceConnectionState)
   }
+  const onIcecandidateError = (event: Event) => {
+    const { address, errorCode, errorText, port, url } =
+      event as RTCPeerConnectionIceErrorEvent
+    logger?.error({
+      message: '🕸🧊 iceCandidateError',
+      address,
+      errorCode,
+      errorText,
+      port,
+      url,
+    })
+  }
 
+  peerConnection.onicecandidateerror = onIcecandidateError
   peerConnection.onicecandidate = onIcecandidate
   peerConnection.oniceconnectionstatechange = onIceconnectionStateChange
 
