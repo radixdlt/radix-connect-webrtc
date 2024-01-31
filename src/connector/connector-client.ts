@@ -147,7 +147,7 @@ export const ConnectorClient = (input: {
         signalingClient,
         source: input.source,
         restart: () => triggerRestartSubject.next(),
-        negotiationTimeout: input.negotiationTimeout ?? 5_000,
+        negotiationTimeout: input.negotiationTimeout ?? 10_000,
       })
 
       const destroy = () => {
