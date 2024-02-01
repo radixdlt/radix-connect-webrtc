@@ -5,7 +5,7 @@ import type {
   Offer,
 } from '@radixdlt/radix-connect-schemas'
 import { ResultAsync } from 'neverthrow'
-import { mergeMap, Subscription, switchMap } from 'rxjs'
+import { filter, mergeMap, Subscription, switchMap, tap } from 'rxjs'
 import type { Logger } from 'tslog'
 import { errorIdentity } from '../../utils/error-identity'
 import type { WebRtcSubjectsType } from './subjects'
@@ -26,7 +26,12 @@ export const PeerConnectionClient = (input: {
 
   const signalingClient = input.signalingClient
   const onRemoteOffer$ = signalingClient.onOffer$
-  const onRemoteAnswer$ = signalingClient.onAnswer$
+
+  subscriptions.add(
+    signalingClient.onAnswer$
+      .pipe(tap((value) => subjects.remoteAnswerSubject.next(value)))
+      .subscribe(),
+  )
 
   const onNegotiationNeeded = () => {
     if (input.shouldCreateOffer)
@@ -54,20 +59,50 @@ export const PeerConnectionClient = (input: {
     subjects.onSignalingStateChangeSubject.next(peerConnection.signalingState)
   }
 
+  const onIceGatheringStateChange = () => {
+    logger?.debug(
+      `🕸🧊 onIceGatheringState: ${peerConnection.iceGatheringState}`,
+    )
+  }
+
+  const onIceConnectionStateChange = () => {
+    logger?.debug(
+      `🕸🧊 onIceConnectionStateChange: ${peerConnection.iceConnectionState}`,
+    )
+  }
+
   peerConnection.onnegotiationneeded = onNegotiationNeeded
   peerConnection.onsignalingstatechange = onSignalingStateChange
+  peerConnection.onicegatheringstatechange = onIceGatheringStateChange
+  peerConnection.oniceconnectionstatechange = onIceConnectionStateChange
 
   const setLocalDescription = (description: RTCSessionDescriptionInit) =>
     ResultAsync.fromPromise(
       peerConnection.setLocalDescription(description),
       errorIdentity,
-    ).map(() => peerConnection.localDescription!)
+    )
+      .map(() => {
+        logger?.debug('🕸✅ localDescriptionSuccess')
+        subjects.onLocalDescriptionSuccessSubject.next(true)
+        return peerConnection.localDescription!
+      })
+      .mapErr((err) => {
+        logger?.debug('🕸❌ localDescriptionError')
+        return err
+      })
 
   const setRemoteDescription = (description: RTCSessionDescriptionInit) =>
     ResultAsync.fromPromise(
       peerConnection.setRemoteDescription(description),
       errorIdentity,
     )
+      .map(() => {
+        logger?.debug('🕸✅ setRemoteDescriptionSuccess')
+        subjects.onRemoteDescriptionSuccessSubject.next(true)
+      })
+      .mapErr((error) => {
+        logger?.debug(`🕸❌ setRemoteDescriptionError: ${error}`)
+      })
 
   const createAnswer = () =>
     ResultAsync.fromPromise(peerConnection.createAnswer(), errorIdentity)
@@ -94,7 +129,19 @@ export const PeerConnectionClient = (input: {
   )
 
   subscriptions.add(
-    onRemoteAnswer$.pipe(mergeMap(setRemoteDescription)).subscribe(),
+    subjects.onLocalDescriptionSuccessSubject
+      .pipe(
+        filter((value) => value),
+        switchMap(() =>
+          subjects.remoteAnswerSubject.pipe(
+            filter(
+              (session): session is RTCSessionDescriptionInit => !!session,
+            ),
+            mergeMap(setRemoteDescription),
+          ),
+        ),
+      )
+      .subscribe(),
   )
 
   return {
