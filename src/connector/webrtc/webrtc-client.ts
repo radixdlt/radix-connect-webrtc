@@ -12,10 +12,12 @@ import {
   map,
   merge,
   mergeMap,
+  of,
   Subscription,
   switchMap,
   tap,
   timer,
+  withLatestFrom,
 } from 'rxjs'
 import type {
   ChunkedMessageType,
@@ -129,7 +131,21 @@ export const WebRtcClient = (input: {
         first(),
         mergeMap(() =>
           merge(
-            signalingClient.remoteClientDisconnected$,
+            signalingClient.remoteClientDisconnected$.pipe(
+              withLatestFrom(subjects.iceConnectionStateSubject),
+              switchMap(([, state]) => {
+                if (
+                  state &&
+                  ['connected', 'completed', 'checking'].includes(state)
+                )
+                  return timer(3_000).pipe(
+                    withLatestFrom(subjects.dataChannelStatusSubject),
+                    filter(([, status]) => status === 'closed'),
+                  )
+
+                return of(true)
+              }),
+            ),
             timer(100).pipe(
               switchMap(() => signalingClient.remoteClientConnected$),
             ),
