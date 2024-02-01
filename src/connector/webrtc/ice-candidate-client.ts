@@ -55,6 +55,16 @@ export const IceCandidateClient = (input: {
       peerConnection.addIceCandidate(iceCandidate),
       errorIdentity,
     )
+      .map(() => {
+        logger?.trace(
+          `🧊⬇️✅ addIceCandidateSuccess: ${iceCandidate.candidate}`,
+        )
+        return iceCandidate
+      })
+      .mapErr(() => {
+        logger?.trace(`🧊⬇️❌ addIceCandidateError: ${iceCandidate.candidate}`)
+        return iceCandidate
+      })
 
   const subscriptions = new Subscription()
 
