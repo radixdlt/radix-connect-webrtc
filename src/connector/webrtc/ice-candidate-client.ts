@@ -55,6 +55,16 @@ export const IceCandidateClient = (input: {
       peerConnection.addIceCandidate(iceCandidate),
       errorIdentity,
     )
+      .map(() => {
+        logger?.trace(
+          `🧊⬇️✅ addIceCandidateSuccess: ${iceCandidate.candidate}`,
+        )
+        return iceCandidate
+      })
+      .mapErr(() => {
+        logger?.trace(`🧊⬇️❌ addIceCandidateError: ${iceCandidate.candidate}`)
+        return iceCandidate
+      })
 
   const subscriptions = new Subscription()
 
@@ -77,18 +87,10 @@ export const IceCandidateClient = (input: {
     ),
   )
 
-  const haveLocalOffer$ = subjects.onSignalingStateChangeSubject.pipe(
-    filter((value) => value === 'have-local-offer'),
-  )
-
-  const haveRemoteOffer$ = subjects.onSignalingStateChangeSubject.pipe(
-    filter((value) => value === 'have-remote-offer'),
-  )
-  const waitForRemoteDescription$ = merge(
-    haveLocalOffer$,
-    haveRemoteOffer$,
-    subjects.onRemoteAnswerSubject,
-  )
+  const onRemoteDescriptionSuccess$ =
+    subjects.onRemoteDescriptionSuccessSubject.pipe(
+      filter((isSuccess) => isSuccess),
+    )
 
   const onRemoteIceCandidate$ = merge(
     subjects.remoteIceCandidatesSubject.pipe(
@@ -110,7 +112,7 @@ export const IceCandidateClient = (input: {
   )
 
   subscriptions.add(
-    waitForRemoteDescription$
+    onRemoteDescriptionSuccess$
       .pipe(
         mergeMap(() => onRemoteIceCandidate$),
         concatMap(addIceCandidate),

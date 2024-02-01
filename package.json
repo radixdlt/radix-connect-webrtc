@@ -44,6 +44,7 @@
   },
   "types": "./dist/radix-connect-webrtc.d.ts",
   "scripts": {
+    "dev": "npx tsx --watch ./examples/connector-client.ts",
     "build": "rollup -c",
     "prettier": "prettier --cache --check src",
     "prettier:fix": "prettier --cache --write src",
