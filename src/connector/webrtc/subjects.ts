@@ -27,4 +27,7 @@ export const WebRtcSubjects = () => ({
   remoteAnswerSubject: new BehaviorSubject<
     RTCSessionDescriptionInit | undefined
   >(undefined),
+  peerConnectionStateSubject: new BehaviorSubject<
+    RTCPeerConnectionState | undefined
+  >(undefined),
 })

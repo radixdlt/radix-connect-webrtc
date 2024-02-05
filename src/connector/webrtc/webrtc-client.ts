@@ -212,9 +212,10 @@ export const WebRtcClient = (input: {
   )
 
   subscriptions.add(
-    subjects.iceConnectionStateSubject
+    subjects.peerConnectionStateSubject
       .pipe(
-        filter((state) => state === 'disconnected'),
+        filter((state): state is RTCPeerConnectionState => !!state),
+        filter((state) => ['disconnected', 'closed', 'failed'].includes(state)),
         tap(() => {
           restart()
         }),
