@@ -65,16 +65,17 @@ export const PeerConnectionClient = (input: {
     )
   }
 
-  const onIceConnectionStateChange = () => {
+  const onPeerConnectionState = () => {
     logger?.debug(
-      `🕸🧊 onIceConnectionStateChange: ${peerConnection.iceConnectionState}`,
+      `🕸🧊 onPeerConnectionStateChange: ${peerConnection.connectionState}`,
     )
+    subjects.peerConnectionStateSubject.next(peerConnection.connectionState)
   }
 
   peerConnection.onnegotiationneeded = onNegotiationNeeded
   peerConnection.onsignalingstatechange = onSignalingStateChange
   peerConnection.onicegatheringstatechange = onIceGatheringStateChange
-  peerConnection.oniceconnectionstatechange = onIceConnectionStateChange
+  peerConnection.onconnectionstatechange = onPeerConnectionState
 
   const setLocalDescription = (description: RTCSessionDescriptionInit) =>
     ResultAsync.fromPromise(
